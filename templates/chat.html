@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>
+Support Ticket Similarity Assistant
+</title>
+
+<link
+rel="stylesheet"
+href="{{ url_for('static',
+filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <!-- LEFT PANEL -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <h1>
+                Solari Analytics
+            </h1>
+
+            <p>
+                Support Intelligence Assistant
+            </p>
+
+        </div>
+
+        <div class="panel">
+
+            <h3>
+                Historical Ticket Dataset
+            </h3>
+
+            <label
+                for="ticket-file"
+                class="dropzone">
+
+                <div class="drop-content">
+
+                    <div class="drop-icon">
+                        📂
+                    </div>
+
+                    <div id="file-name">
+
+                        Select tickets.json
+
+                    </div>
+
+                </div>
+
+            </label>
+
+            <input
+                hidden
+                type="file"
+                id="ticket-file">
+
+            <button
+                class="upload-btn"
+                onclick="uploadFile()">
+
+                Build Knowledge Base
+
+            </button>
+
+        </div>
+
+        <div
+            id="upload-status"
+            class="panel">
+
+            📂 Upload tickets.json to build
+            the knowledge base.
+
+        </div>
+
+        <div
+            id="stats-card"
+            class="panel hidden">
+
+            <h3>
+                Knowledge Base Status
+            </h3>
+
+            <div
+                id="ticket-count">
+            </div>
+
+        </div>
+
+        <div class="panel">
+
+            <h3>
+                Better Search Results
+            </h3>
+
+            <div class="guidance">
+
+                Include when available:
+
+                <br><br>
+
+                ✅ Error messages
+
+                <br>
+
+                ✅ Product area
+
+                <br>
+
+                ✅ Category
+
+                <br>
+
+                ✅ Tags
+
+                <br>
+
+                ✅ Customer symptoms
+
+                <br><br>
+
+                More context improves
+                retrieval accuracy.
+
+            </div>
+
+        </div>
+
+        <div class="panel">
+
+            <h3>
+                Sample Queries
+            </h3>
+
+            <div class="example">
+
+                Customer charged twice for subscription renewal.
+
+            </div>
+
+            <div class="example">
+
+                Password reset email never arrives.
+
+            </div>
+
+            <div class="example">
+
+                Revenue dashboard shows blank page.
+
+            </div>
+
+            <div class="example">
+
+                API returning HTTP 429 errors.
+
+            </div>
+
+        </div>
+
+    </aside>
+
+    <!-- CHAT PANEL -->
+
+    <main class="chat-section">
+
+        <div class="chat-header">
+
+            <div>
+
+                <h2>
+                    Support Assistant
+                </h2>
+
+                <small>
+                    Semantic Search +
+                    AI Recommendations
+                </small>
+
+            </div>
+
+            <div
+                id="app-status"
+                class="status-pill">
+
+                Waiting For Dataset
+
+            </div>
+
+        </div>
+
+        <div
+            id="chat-window"
+            class="chat-window">
+
+            <div class="assistant-row">
+
+                <div class="avatar">
+
+                    🤖
+
+                </div>
+
+                <div class="assistant-bubble">
+
+                    Welcome.
+
+                    <br><br>
+
+                    Upload a support ticket dataset to begin.
+
+                    <br><br>
+
+                    I can help you:
+
+                    <br>
+
+                    • Find similar tickets
+
+                    <br>
+
+                    • Identify previous resolutions
+
+                    <br>
+
+                    • Recommend troubleshooting steps
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="chat-input">
+
+            <textarea
+
+                id="message"
+
+                disabled
+
+                placeholder="Upload tickets.json to enable chat...">
+
+            </textarea>
+
+            <button
+
+                id="chat-btn"
+
+                disabled
+
+                onclick="sendMessage()">
+
+                Send
+
+            </button>
+
+        </div>
+
+    </main>
+
+</div>
+
+<script
+src="{{ url_for(
+    'static',
+    filename='js/chat.js') }}">
+</script>
+
+</body>
+
+</html>
