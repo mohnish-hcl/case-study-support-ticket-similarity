@@ -1,31 +1,17 @@
-from langchain_ollama import (
-    ChatOllama
-)
+from langchain_ollama import ChatOllama
+from services.config import OLLAMA_LLM_MODEL
 
-from services.config import (
-    OLLAMA_LLM_MODEL
-)
-
-llm = ChatOllama(
-    model=OLLAMA_LLM_MODEL,
-    temperature=0.2
-)
+llm = ChatOllama(model=OLLAMA_LLM_MODEL, temperature=0.2)
 
 
 class LLMService:
 
     @staticmethod
-    def generate_response(
-        query,
-        matches
-    ):
-
+    def generate_response(query, matches):
         context = ""
 
         for match in matches:
-
             context += f"""
-
 Ticket:
 {match['ticket_id']}
 
@@ -37,7 +23,6 @@ Tags:
 
 Resolution:
 {match['resolution']}
-
 """
 
         prompt = f"""
@@ -66,8 +51,5 @@ Do NOT:
 - Use numbered lists
 """
 
-        response = llm.invoke(
-            prompt
-        )
-
+        response = llm.invoke(prompt)
         return response.content.strip()
