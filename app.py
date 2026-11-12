@@ -71,16 +71,16 @@ def search():
     if intent == "CHAT":
 
         prompt = f"""
-You are a friendly Support Assistant.
+        You are a friendly Support Assistant.
 
-Conversation History:
-{history}
+        Conversation History:
+        {history}
 
-Current User Message:
-{query}
+        Current User Message:
+        {query}
 
-Respond naturally.
-"""
+        Respond naturally.
+        """
 
         response = chat_llm.invoke(prompt)
 
@@ -109,16 +109,16 @@ Respond naturally.
     if search_result["status"] == "NO_MATCH":
 
         fallback_prompt = f"""
-Conversation:
-{history}
+        Conversation:
+        {history}
 
-User:
-{query}
+        User:
+        {query}
 
-No ticket matches were found.
+        No ticket matches were found.
 
-Provide the best possible assistance.
-"""
+        Provide the best possible assistance.
+        """
 
         response = chat_llm.invoke(
             fallback_prompt
