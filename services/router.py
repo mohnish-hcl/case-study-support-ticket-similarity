@@ -1,48 +1,57 @@
-import re
+from langchain_ollama import ChatOllama
+from services.config import OLLAMA_LLM_MODEL
+
+router_llm = ChatOllama(
+    model=OLLAMA_LLM_MODEL,
+    temperature=0
+)
 
 
 class QueryRouter:
 
-    CHAT_PATTERNS = [
-        r"^hi$",
-        r"^hello$",
-        r"^hey$",
-        r"^thanks$",
-        r"^thank you$",
-        r"^good morning$",
-        r"^good evening$",
-        r"^how are you$",
-        r"^who are you$",
-        r"^help$",
-        r"^what can you do\??$"
-    ]
-
     @staticmethod
-    def classify(query):
-        message = query.strip().lower()
+    def classify(query: str, history: str):
 
-        # -----------------------
-        # Cheap deterministic check
-        # -----------------------
-        for pattern in QueryRouter.CHAT_PATTERNS:
-            if re.match(pattern, message):
-                return "CHAT"
+        prompt = f"""
+        You are a routing agent.
 
-        # -----------------------
-        # Search-like indicators
-        # -----------------------
-        search_keywords = [
-            "error", "issue", "problem", "dashboard", "billing",
-            "invoice", "charge", "login", "authentication", "password",
-            "api", "export", "report", "customer", "ticket",
-            "latency", "timeout", "integration", "failed", "failure"
-        ]
+        Conversation History:
+        {history}
 
-        for keyword in search_keywords:
-            if keyword in message:
-                return "SEARCH"
+        Current User Message:
+        {query}
 
-        # -----------------------
-        # Default
-        # -----------------------
-        return "CHAT"
+        Decide whether historical ticket search is needed.
+
+        Return ONLY one word:
+
+        CHAT
+        SEARCH
+
+        Use CHAT for:
+        - greetings
+        - small talk
+        - thank you
+        - general discussion
+        - follow up answerable from history
+
+        Use SEARCH for:
+        - customer issues
+        - incidents
+        - troubleshooting
+        - bugs
+        - login problems
+        - API issues
+        - dashboard failures
+        - support requests
+        - resolution recommendations
+        """
+
+        response = router_llm.invoke(prompt)
+
+        result = response.content.strip().upper()
+
+        if result not in ["CHAT", "SEARCH"]:
+            return "SEARCH"
+
+        return result

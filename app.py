@@ -4,11 +4,11 @@ from langchain_ollama import ChatOllama
 
 from services.config import OLLAMA_LLM_MODEL
 from services.router import QueryRouter
-from services.memory import add_user_message, add_assistant_message
+from services.memory import add_user_message, add_assistant_message, build_history_text
 from services.ingest import TicketIngestionService
 from services.retriever import RetrievalService
 from services.llm_service import LLMService
-
+from services.query_rewriter import QueryRewriter
 # ====================================
 # APP SETUP
 # ====================================
@@ -46,57 +46,110 @@ def upload():
 
 @app.route("/search", methods=["POST"])
 def search():
+
     body = request.json or {}
+
     query = body.get("message", "").strip()
 
     if not query:
-        return jsonify({"status": "ERROR", "message": "Query cannot be empty"})
+        return jsonify({
+            "status": "ERROR",
+            "message": "Query cannot be empty"
+        })
 
     add_user_message(query)
 
-    # Route request
-    intent = QueryRouter.classify(query)
-    print(f"Intent Detected: {intent}")
+    history = build_history_text()
 
-    # Normal chat
+    intent = QueryRouter.classify(
+        query=query,
+        history=history
+    )
+
+    print(f"ROUTER DECISION: {intent}")
+
     if intent == "CHAT":
-        prompt = f"""You are a friendly Support Ticket Assistant.
 
-Capabilities:
-- Search historical tickets
-- Find similar incidents
-- Suggest resolutions
-- Answer support workflow questions
+        prompt = f"""
+You are a friendly Support Assistant.
 
-User Message:
+Conversation History:
+{history}
+
+Current User Message:
 {query}
 
-Be helpful and concise."""
+Respond naturally.
+"""
 
         response = chat_llm.invoke(prompt)
+
         assistant_message = response.content
-        add_assistant_message(assistant_message)
 
-        return jsonify({"status": "CHAT", "response": assistant_message})
+        add_assistant_message(
+            assistant_message
+        )
 
-    # Vector search
-    search_result = RetrievalService.search(query)
+        return jsonify({
+            "status": "CHAT",
+            "response": assistant_message
+        })
 
-    # No results
-    if search_result.get("status") == "NO_MATCH":
-        add_assistant_message(search_result["message"])
-        return jsonify({"status": "NO_MATCH", "message": search_result["message"], "matches": []})
+    search_query = QueryRewriter.rewrite(
+        query=query,
+        history=history
+    )
 
-    # LLM response with retrieved context
-    llm_response = LLMService.generate_response(query, search_result["matches"])
-    add_assistant_message(llm_response)
+    print(f"REWRITTEN QUERY: {search_query}")
+
+    search_result = RetrievalService.search(
+        search_query
+    )
+
+    if search_result["status"] == "NO_MATCH":
+
+        fallback_prompt = f"""
+Conversation:
+{history}
+
+User:
+{query}
+
+No ticket matches were found.
+
+Provide the best possible assistance.
+"""
+
+        response = chat_llm.invoke(
+            fallback_prompt
+        )
+
+        answer = response.content
+
+        add_assistant_message(answer)
+
+        return jsonify({
+            "status": "CHAT",
+            "response": answer
+        })
+
+    llm_response = (
+        LLMService.generate_response(
+            query=query,
+            matches=search_result["matches"],
+            history=history
+        )
+    )
+
+    add_assistant_message(
+        llm_response
+    )
 
     return jsonify({
         "status": "MATCH_FOUND",
         "llm_response": llm_response,
         "matches": search_result["matches"]
     })
-
 # ====================================
 # START APP
 # ====================================

@@ -94,17 +94,22 @@ The final solution does not use the keyword overlap approach because semantic re
 ## Architecture
 
 User Query
-→ Intent Router
-→ CHAT or SEARCH
+→ Conversation History
+→ LLM Router
+
+CHAT:
+→ Phi4 Mini Response
 
 SEARCH:
-
-User Query
+→ Query Rewriter
 → Nomic Embed Text
 → ChromaDB
 → Similar Historical Tickets
 → Phi4 Mini Recommendation
 → Ticket Listing
+
+All interactions are stored in conversation memory and used for follow-up questions.
+
 
 ---
 

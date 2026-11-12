@@ -19,12 +19,12 @@ class TicketIngestionService:
 
             document = Document(
                 page_content=f"""
-Subject:
-{ticket.get('subject', '')}
+                Subject:
+                {ticket.get('subject', '')}
 
-Description:
-{ticket.get('description', '')}
-""",
+                Description:
+                {ticket.get('description', '')}
+                """,
                 metadata={
                     "ticket_id": ticket_id,
                     "subject": ticket.get("subject", ""),
@@ -42,6 +42,8 @@ Description:
 
         collection = vector_store._collection
         existing = collection.get()
+        print(existing)
+        print(documents)
 
         if existing["ids"]:
             collection.delete(ids=existing["ids"])
@@ -49,10 +51,3 @@ Description:
         vector_store.add_documents(documents=documents, ids=ids)
 
         return {"count": len(documents)}
-
-    @staticmethod
-    def collection_count():
-        try:
-            return vector_store._collection.count()
-        except:
-            return 0
